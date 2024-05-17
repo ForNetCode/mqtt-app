@@ -1,0 +1,29 @@
+[package]
+name = "mshell"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+atty = "0.2"
+
+tokio = { version = "1", features = ["rt", "rt-multi-thread", "macros", "signal", "sync", "time"] }
+rumqttc = { version = "0.24", features = ["use-rustls", "url"] }
+
+tokio-rustls = "0.26"
+clap = { version = "4.5", features = ["derive"] }
+auto-launch-extra = {version = "0.5", package = "auto-launch"}
+
+cmd_lib = "1.9"
+shell-candy = "0.4"
+
+anyhow = "1"
+
+serde_yml = "0.0.7"
+serde = { version = "1.0.202", features = ["derive"] }
+serde_json = "1.0"
+etcetera = "0.8"
+
+[build-dependencies]
+#vergen = { version = "9.0.0-beta.2" ,features = ["build"]}
