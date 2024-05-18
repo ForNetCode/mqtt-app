@@ -1,7 +1,12 @@
+use std::io::{BufRead, BufReader};
 use serde::{Deserialize, Serialize};
+use shell_candy::{ShellTask, ShellTaskBehavior};
 use tokio::sync::broadcast;
-use tracing::info;
+use tracing::{debug, info};
 use crate::connection::Connection;
+use std::process::Command;
+use std::sync::Arc;
+use crate::config::Config;
 
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -13,28 +18,53 @@ pub enum RequestMessage {
     }
 }
 
-//#[derive(Serialize, Deserialize, Debug, Clone)]
-//#[serde(tag = "type")]
-pub struct ResponseMessage {
-    request_id: String,
-//    response: T,
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(tag = "type")]
+pub enum ResponseMessage {
+    Ok{ request_id:String, seq:u32, data:String, pid:u32},
+    Err{ request_id:String, message:String}
 }
 
 
 type Receiver = broadcast::Receiver<(String,RequestMessage)>;
 pub struct Handler {
     cmd_rx: Receiver,
+    connection: Connection,
+    publish_topic: String,
 }
 
 
 
 impl Handler {
-    pub fn new(cmd_rx: Receiver) -> Self {
-        Self { cmd_rx }
+    pub fn new(cmd_rx: Receiver, connection: Connection, publish_topic: String) -> Self {
+        Self { cmd_rx, connection, publish_topic}
     }
 
-    pub async fn run(&mut self, _connection: Connection, _shutdown_rx:broadcast::Receiver<bool>) {
-        while let Ok(cmd) = self.cmd_rx.recv().await {
+    pub async fn run(&mut self, _shutdown_rx:broadcast::Receiver<bool>) {
+
+        while let Ok((_, cmd)) = self.cmd_rx.recv().await {
+            match cmd {
+                RequestMessage::Cmd { command,request_id } => {
+                    let mut seq:u32 = 1;
+                    match Command::new(&command).spawn() {
+                        Ok(mut child) => {
+                            let pid = child.id();
+                            if let Some(stdout) = child.stdout.take() {
+                                let reader = BufReader::new(stdout);
+                                for line in reader.lines().filter_map(|line| line.ok()) {
+                                    //TODO: handle publish error
+                                    let _ = self.connection.publish_response(
+                                        &self.publish_topic, ResponseMessage::Ok {request_id: request_id.clone(),data:line, seq: seq, pid: pid}).await;
+                                    seq +=1;
+                                }
+                            }
+                        }
+                        Err(e) => {
+                            let _ = self.connection.publish_response(&self.publish_topic,  ResponseMessage::Err {request_id: request_id.clone(), message:format!("{}", e)}).await;
+                        }
+                    }
+                }
+            }
             info!("begin to handle cmd: {:?}",cmd);
         }
     }
@@ -43,22 +73,18 @@ impl Handler {
 #[cfg(test)]
 mod test {
     use std::io::{BufRead, BufReader};
-    use std::process::{Command, Stdio};
+    use std::process::Command;
+    use std::time::Duration;
 
-    use cmd_lib::{run_cmd, spawn, spawn_with_output};
     use super::RequestMessage;
+    use shell_candy::{ShellTaskLog, ShellTaskBehavior, ShellTask};
 
     #[test]
     fn test_serde() {
         let message:RequestMessage = serde_json::from_str(r#"{"type":"Cmd", "command":"ls"}"#).unwrap();
         println!("{:?}", message);
     }
-    #[test]
-    pub fn run_basic_shell() {
-        let command = vec!["ls", "-ls"];
-        let mut z = spawn_with_output!($[command]).unwrap();
-        println!("{:?}", z.wait_with_output());
-    }
+
 
     #[test]
     pub fn parse() {
@@ -70,32 +96,21 @@ mod test {
         }
 
         println!("pid:{}",child.id());
+        std::thread::sleep(Duration::from_secs(10));
+        child.kill().unwrap()
 
     }
     #[test]
     pub fn parse2() {
+        let task = ShellTask::new(r#"ls"#).unwrap();
 
-        let mut v = spawn!(top).unwrap();
+        let z = task.run(|line|  {
+            match line {
+                ShellTaskLog::Stdout(message) | ShellTaskLog::Stderr(message) => eprintln!("{}", &message),
+            }
+            ShellTaskBehavior::<()>::Passthrough
+        });
+        println!("{z:?}");
 
-        v.kill().unwrap();
-
-
-    }
-    #[test]
-    pub fn run_stream_shell() {
-
-        let mut z = spawn_with_output!(top).unwrap();
-
-
-        println!("pids:{:?}",z.pids());
-
-         z.wait_with_pipe(&mut|pipe| {
-            BufReader::new(pipe)
-                .lines()
-                .take(5)
-                .filter_map(|line| line.ok())
-                .for_each(|line| println!("{}", line));
-        }).unwrap();
-        println!("over");
     }
 }

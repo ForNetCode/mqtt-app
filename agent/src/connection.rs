@@ -1,21 +1,22 @@
+use std::sync::Arc;
 use std::time::Duration;
 use anyhow::{bail, Context};
-use rumqttc::v5::{MqttOptions, AsyncClient, EventLoop, Event, Incoming};
+use rumqttc::v5::{MqttOptions, AsyncClient, EventLoop, Event, Incoming, ClientError};
 use rumqttc::v5::mqttbytes::QoS;
 use tokio::sync::broadcast;
 use tracing::{debug, error, warn};
 
-
 use crate::config::Config;
-use crate::handler::RequestMessage;
+use crate::handler::{RequestMessage, ResponseMessage};
 
+#[derive(Clone, Debug)]
 pub struct Connection {
-  client: AsyncClient,
+  pub client: AsyncClient,
 }
 
 
 impl Connection {
-    pub async fn connect(config:Config) -> anyhow::Result<(Self, EventLoop)>{
+    pub async fn connect(config:Arc<Config>) -> anyhow::Result<(Self, EventLoop)>{
 
       let mut options = MqttOptions::parse_url(&config.server).with_context(|| format!("parser mqtt url fail: {:?}", config.server))?;
 
@@ -33,6 +34,9 @@ impl Connection {
       Ok((Connection {
           client,
       }, eventloop))
+    }
+    pub async fn publish_response(&self, topic:&String, message:ResponseMessage) -> Result<(), ClientError> {
+        self.client.publish(topic, QoS::ExactlyOnce, false, serde_json::to_vec(&message).unwrap())
     }
 
     pub async fn loop_event(mut event_loop: EventLoop, mut shutdown_rx:broadcast::Receiver<bool>, mqtt_tx: broadcast::Sender<(String, RequestMessage)>) {

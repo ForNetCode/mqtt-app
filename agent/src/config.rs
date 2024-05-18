@@ -3,11 +3,12 @@ use etcetera::BaseStrategy;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
-pub const APP_NAME: &str = "mshell";
+pub const APP_NAME: &str = "mproxy";
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Config {
-    pub command_topic: Option<String>,
+    command_topic: Option<String>,
+    response_command_topic: Option<String>,
     pub server: String,
     pub client_id: String,
     pub username: Option<String>,
@@ -38,8 +39,11 @@ impl Config {
     }
 
     pub fn get_command_topic(&self) -> String {
-        self.command_topic.clone().unwrap_or_else(||format!("{}/command", self.client_id))
+        self.command_topic.clone().unwrap_or_else(||format!("{}/cmd", self.client_id))
 
+    }
+    pub fn get_response_command_topic(&self) ->  String {
+        self.command_topic.clone().unwrap_or_else(||format!("{}/cmd/resp",  self.client_id))
     }
 }
 

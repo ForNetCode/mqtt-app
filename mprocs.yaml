@@ -1,0 +1,8 @@
+procs:
+  mqtt:
+    shell: cd develop && ./run_mqtt.sh
+  mproxy:
+    shell: cd agent && cargo run -- config.toml
+  web:
+    shell: cd web && npm run dev
+    stop: SIGKILL

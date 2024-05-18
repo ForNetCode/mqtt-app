@@ -9,7 +9,6 @@
     
 浏览器通过 MQTT Websocket 连接 MQTT，获取订阅消息并展示。
 
-
 ### 协议交互
 交互协议走 json 字符串。
 ```json5
@@ -23,13 +22,35 @@
 
 # mproxy response
 # publish topic: $client/cmd/resp
+# success response        
 {
+  type: "Ok"      
   data: "abc.txt/nccn.txt",
   requestId: "random_to_track",
   pid: 39512, #process id
   seq: 1 #some may resp more than one time, so set seq to keep order.
 }
+# failure response
+{
+  type: "Err",
+  message: "response data"
+  requestId: "random_to_track"
+}
 ```
+### 配置文件
+
+
+### 开发
+Install [Rust 1.70+](https://www.rust-lang.org/),
+[Node v18](https://nodejs.org/), [NPM v9](https://www.npmjs.com/), and
+[mprocs](https://github.com/pvolok/mprocs). Then, run
+```shell
+cd web && npm install && cd ../
+mprocs
+```
+
+## 限制
+目前只支持普通的命令, 不支持 `sudo xxx` 之类命令。
 
 ### 应用场景举例
 1. 执行 `sshx`, 暴露 shell 给远端。

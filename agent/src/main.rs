@@ -5,6 +5,7 @@ mod handler;
 use anyhow::Context;
 use clap::{Parser, ArgGroup};
 use std::path::PathBuf;
+use std::sync::Arc;
 use tokio::{signal, sync::broadcast};
 use tracing_subscriber::EnvFilter;
 use crate::connection::Connection;
@@ -45,8 +46,6 @@ async fn main() -> anyhow::Result<()> {
 
     let config = config::Config::new(ops.config_path).with_context(|| "Config can not load")?;
 
-
-
     run(shutdown_rx, config).await?;
     Ok(())
 }
@@ -54,14 +53,16 @@ async fn main() -> anyhow::Result<()> {
 
 async fn run(shutdown_rx:broadcast::Receiver<bool>, config: config::Config) -> anyhow::Result<()>{
 
+    let config = Arc::new(config);
     //todo: 优化 Message clone 问题。 或是替换队列
     let (cmd_tx, cmd_rx) = broadcast::channel::<(String, RequestMessage)>(5);
-    let mut handler = Handler::new(cmd_rx);
-    let (connection, event_loop) = Connection::connect(config).await?;
+
+    let (connection, event_loop) = Connection::connect(config.clone()).await?;
+    let mut handler = Handler::new(cmd_rx, connection, config.get_response_command_topic());
     let shutdown_rx_1 = shutdown_rx.resubscribe();
 
     tokio::spawn(async move {
-        handler.run(connection, shutdown_rx_1).await;
+        handler.run(shutdown_rx_1).await;
     });
     Connection::loop_event(event_loop, shutdown_rx, cmd_tx).await;
     Ok(())
@@ -74,14 +75,15 @@ async fn run(shutdown_rx:broadcast::Receiver<bool>, config: config::Config) -> a
 mod test {
     use clap::Parser;
     use crate::Cli;
+    use crate::config::APP_NAME;
 
     #[test]
     fn parse_cli() {
-        let result = Cli::parse_from(["mshell", "config.yaml"]);
+        let result = Cli::parse_from([APP_NAME, "config.yaml"]);
         println!("{:?}", result);
-        let result = Cli::parse_from(["mshell", "--version"]);
+        let result = Cli::parse_from([APP_NAME, "--version"]);
         println!("{:?}", result);
-        let result = Cli::parse_from(["mshell", "--help"]);
+        let result = Cli::parse_from([APP_NAME, "--help"]);
         println!("{:?}", result);
     }
 }
