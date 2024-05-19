@@ -55,4 +55,10 @@ mod test {
     pub fn get_default_config_path_test() {
         println!("{:?}", Config::get_default_config_path());
     }
+
+    #[test]
+    pub fn test_config_serial() {
+        let config = Config::new(Some("./config.yml".parse().unwrap())).unwrap();
+        println!("{:?}", config)
+    }
 }

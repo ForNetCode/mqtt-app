@@ -58,7 +58,7 @@ node.busy.handshaking = 0
 # Value: off | file | console | both
 log.to = "console"
 # Value: trace, debug, info, warn, error
-log.level = "info"
+log.level = "debug"
 log.dir = "/var/log/rmqtt"
 log.file = "rmqtt.log"
 

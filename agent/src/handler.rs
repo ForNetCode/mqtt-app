@@ -1,12 +1,9 @@
 use std::io::{BufRead, BufReader};
 use serde::{Deserialize, Serialize};
-use shell_candy::{ShellTask, ShellTaskBehavior};
 use tokio::sync::broadcast;
-use tracing::{debug, info};
+use tracing::{info};
 use crate::connection::Connection;
 use std::process::Command;
-use std::sync::Arc;
-use crate::config::Config;
 
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -43,6 +40,7 @@ impl Handler {
     pub async fn run(&mut self, _shutdown_rx:broadcast::Receiver<bool>) {
 
         while let Ok((_, cmd)) = self.cmd_rx.recv().await {
+            info!("begin to handle cmd: {:?}",&cmd);
             match cmd {
                 RequestMessage::Cmd { command,request_id } => {
                     let mut seq:u32 = 1;
@@ -65,7 +63,6 @@ impl Handler {
                     }
                 }
             }
-            info!("begin to handle cmd: {:?}",cmd);
         }
     }
 }
@@ -77,7 +74,7 @@ mod test {
     use std::time::Duration;
 
     use super::RequestMessage;
-    use shell_candy::{ShellTaskLog, ShellTaskBehavior, ShellTask};
+
 
     #[test]
     fn test_serde() {
@@ -100,17 +97,5 @@ mod test {
         child.kill().unwrap()
 
     }
-    #[test]
-    pub fn parse2() {
-        let task = ShellTask::new(r#"ls"#).unwrap();
 
-        let z = task.run(|line|  {
-            match line {
-                ShellTaskLog::Stdout(message) | ShellTaskLog::Stderr(message) => eprintln!("{}", &message),
-            }
-            ShellTaskBehavior::<()>::Passthrough
-        });
-        println!("{z:?}");
-
-    }
 }

@@ -12,8 +12,7 @@ use crate::connection::Connection;
 use crate::handler::{Handler, RequestMessage};
 
 #[derive(Parser, Debug)]
-
-#[clap(name = "mshell", version = env!("CARGO_PKG_VERSION"))]
+#[clap(name = crate::config::APP_NAME, version = env!("CARGO_PKG_VERSION"))]
 #[clap(group(ArgGroup::new("cmds").required(true).args(&["CONFIG"]),))]
 struct Cli {
     #[clap(value_parser, name = "CONFIG")]

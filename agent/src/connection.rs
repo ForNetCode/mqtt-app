@@ -17,8 +17,8 @@ pub struct Connection {
 
 impl Connection {
     pub async fn connect(config:Arc<Config>) -> anyhow::Result<(Self, EventLoop)>{
-
-      let mut options = MqttOptions::parse_url(&config.server).with_context(|| format!("parser mqtt url fail: {:?}", config.server))?;
+      let mqtt_url = format!("{}?client_id={}", &config.server, &config.client_id);
+      let mut options = MqttOptions::parse_url(&mqtt_url).with_context(|| format!("parser mqtt url fail: {:?}", &mqtt_url))?;
 
       match (&config.password, &config.username) {
           (Some(pass), Some(user)) => {
@@ -36,7 +36,7 @@ impl Connection {
       }, eventloop))
     }
     pub async fn publish_response(&self, topic:&String, message:ResponseMessage) -> Result<(), ClientError> {
-        self.client.publish(topic, QoS::ExactlyOnce, false, serde_json::to_vec(&message).unwrap())
+        self.client.publish(topic, QoS::ExactlyOnce, false, serde_json::to_vec(&message).unwrap()).await
     }
 
     pub async fn loop_event(mut event_loop: EventLoop, mut shutdown_rx:broadcast::Receiver<bool>, mqtt_tx: broadcast::Sender<(String, RequestMessage)>) {

@@ -13,10 +13,7 @@ rumqttc = { version = "0.24", features = ["use-rustls", "url"] }
 
 tokio-rustls = "0.26"
 clap = { version = "4.5", features = ["derive"] }
-auto-launch-extra = {version = "0.5", package = "auto-launch"}
-
-#cmd_lib = "1.9" # this only support macro
-shell-candy = "0.4"
+#auto-launch-extra = {version = "0.5", package = "auto-launch"}
 
 anyhow = "1"
 
