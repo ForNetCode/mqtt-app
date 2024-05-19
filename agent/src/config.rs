@@ -2,6 +2,7 @@ use anyhow::bail;
 use etcetera::BaseStrategy;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
+use tracing::info;
 
 pub const APP_NAME: &str = "mproxy";
 
@@ -21,7 +22,7 @@ impl Config {
         if !config_path.is_file() {
             bail!("config file not found: {:?}", config_path);
         }
-
+        info!("load config from {:?}", config_path);
         let config = std::fs::read_to_string(config_path)?;
         let config: Config = serde_yml::from_str(&config)?;
         Ok(config)

@@ -4,7 +4,7 @@ use anyhow::{bail, Context};
 use rumqttc::v5::{MqttOptions, AsyncClient, EventLoop, Event, Incoming, ClientError};
 use rumqttc::v5::mqttbytes::QoS;
 use tokio::sync::broadcast;
-use tracing::{debug, error, warn};
+use tracing::{debug, error, info, warn};
 
 use crate::config::Config;
 use crate::handler::{RequestMessage, ResponseMessage};
@@ -17,6 +17,7 @@ pub struct Connection {
 
 impl Connection {
     pub async fn connect(config:Arc<Config>) -> anyhow::Result<(Self, EventLoop)>{
+      info!("begin to connect mqtt server: {}", &config.server);
       let mqtt_url = format!("{}?client_id={}", &config.server, &config.client_id);
       let mut options = MqttOptions::parse_url(&mqtt_url).with_context(|| format!("parser mqtt url fail: {:?}", &mqtt_url))?;
 
@@ -31,6 +32,7 @@ impl Connection {
       let (client, eventloop) = AsyncClient::new(options, 20);
       let topic = config.get_command_topic();
       let _ = client.subscribe(topic, QoS::ExactlyOnce).await?;
+      info!("connect mqtt server successful");
       Ok((Connection {
           client,
       }, eventloop))
