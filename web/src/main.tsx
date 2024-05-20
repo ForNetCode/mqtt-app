@@ -4,6 +4,7 @@ import { RouterProvider, createRouter } from '@tanstack/react-router'
 
 import { routeTree } from './routeTree.gen'
 import { AuthProvider, useAuth } from './auth'
+import './index.css'
 
 // Set up a Router instance
 const router = createRouter({
@@ -12,6 +13,7 @@ const router = createRouter({
     context: {
         auth: undefined!, // This will be set after we wrap the app in an AuthProvider
     },
+    defaultNotFoundComponent: () => (<p>Not Found</p>)
 })
 
 // Register things for typesafety

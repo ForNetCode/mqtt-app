@@ -28,14 +28,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const isAuthenticated = !!user
 
     const logout = React.useCallback(async () => {
-
-
         setStoredUser(null)
         setUser(null)
     }, [])
 
     const login = React.useCallback(async (username: string) => {
-
         setStoredUser(username)
         setUser(username)
     }, [])
