@@ -13,7 +13,7 @@
 交互协议走 json 字符串。
 ```json5
 # Web websocket-mqtt send
-# publish topic:  $clientId/cmd
+# publish topic:  cmd/$clientId
 {
   cmd: "ls",
   requestId: "random_to_track",
@@ -21,7 +21,7 @@
 }
 
 # mproxy response
-# publish topic: $client/cmd/resp
+# publish topic: cmd/$client/resp
 # success response        
 {
   type: "Ok"      
@@ -46,13 +46,13 @@ Install [Rust 1.70+](https://www.rust-lang.org/),
 [mprocs](https://github.com/pvolok/mprocs). Then, run
 ```shell
 cd web && npm ci && cd ../
-cd develop && ./run_mqtt.sh && cd ../
+cd shell && ./run_mqtt.sh && cd ../
 mprocs
 
-# this is check MQTT agent if is OK
+# Check MQTT agent if is OK
 cd agent && cargo run --example publish_command.rs
 ```
-Web [Figma UI](https://www.figma.com/design/iyL4dms3B8AWGZS14FCRuf/RMQTT-EXEC?m=dev&node-id=0%3A1&t=aXOx1pkofASiwbPa-1)
+Web [Figma UI](https://www.figma.com/design/iyL4dms3B8AWGZS14FCRuf/RMQTT-EXEC?node-id=0%3A1&t=rnIL1LSWwQIXfZdf-1)
 ## 限制
 目前只支持普通的命令, 不支持 `sudo xxx` 之类命令。
 
