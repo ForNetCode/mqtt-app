@@ -15,10 +15,13 @@ async fn main() -> anyhow::Result<()> {
       "ls -ls".to_string()
     };
 
-    let config_path:PathBuf = "./config.yml".parse().unwrap();
-    let publish_client_id = "test_web";
-    let password:Option<String> = None;
     let username:Option<String> = None;
+    let password:Option<String> = None;
+
+    let config_path:PathBuf = "./config.yml".parse().unwrap();
+    let publish_client_id = "root";
+    //let username:Option<String> = Some("".to_string());
+    //let password:Option<String> = Some("".to_string());
 
     let is_terminal = std::io::stdout().is_terminal();
 
