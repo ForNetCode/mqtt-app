@@ -26,8 +26,19 @@ impl Handler {
             info!("begin to handle cmd: {:?}",&cmd);
             match cmd {
                 RequestMessage::Cmd { command,request_id } => {
+                    let command_parsed = shellish_parse::parse(&command,false);
+                    let command_parsed = match command_parsed {
+                        Ok(result) => result,
+                        Err(e) => {
+                            let _ = self.connection.publish_response(&self.publish_topic,  ResponseMessage::Err {request_id: request_id.clone(), message:format!("{}", e)}).await;
+                            continue;
+                        }
+                    };
+
                     let mut seq:u32 = 1;
-                    let mut command = Command::new(&command);
+                    let mut command = Command::new(&command_parsed[0]);
+                    command.args(&command_parsed[1..]);
+
                     command.stdout(Stdio::piped()).stderr(Stdio::piped());
                     match command.spawn() {
                         Ok(mut child) => {
@@ -69,8 +80,15 @@ mod test {
 
 
     #[test]
-    pub fn parse() {
+    fn parse() {
+        let v = shellish_parse::parse("ls -ls #tes",false).unwrap();
+        println!("{v:?}");
+    }
+
+    #[test]
+    fn command_run() {
         let mut cmd = Command::new("ls");
+        cmd.arg("-ls");
         cmd.stdout(Stdio::piped()).stderr(Stdio::piped());
         let mut child = cmd
             .spawn().unwrap();

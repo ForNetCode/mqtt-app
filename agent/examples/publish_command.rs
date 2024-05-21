@@ -1,3 +1,4 @@
+use std::env;
 use std::path::PathBuf;
 use rumqttc::v5::{AsyncClient, MqttOptions, Incoming};
 use rumqttc::v5::mqttbytes::QoS;
@@ -6,8 +7,13 @@ use mproxy::message::{RequestMessage, ResponseMessage};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
+    let args:Vec<String> = env::args().collect();
+    let command = if args.len() > 1 {
+        args.iter().skip(1).map(|x|x.to_string()).collect::<Vec<_>>().join(" ")
+    } else {
+      "ls -ls".to_string()
+    };
 
-    let command = "ls";
     let config_path:PathBuf = "./config.yml".parse().unwrap();
 
     let is_atty = atty::is(atty::Stream::Stdout);
@@ -33,7 +39,7 @@ async fn main() -> anyhow::Result<()> {
                             let resp: ResponseMessage = serde_json::from_slice(data.payload.as_ref()).unwrap();
 
                             match resp {
-                                ResponseMessage::Ok {data, seq,..} => println!("recv:{data}, seq: {seq}"),
+                                ResponseMessage::Ok {data, seq, pid, ..} => println!("[{pid}][{seq}] {data}"),
                                 ResponseMessage::Err {message,..} => eprintln!("{message}"),
                             }
                         }
