@@ -52,8 +52,9 @@ jobs:
         run: ${{ matrix.settings.build }}
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v2
+        uses: svenstaro/upload-release-action@v2
         with:
-          name: mproxy-${{ matrix.settings.target }}
-          path: release/*
-          if-no-files-found: error
+          asset_name: mproxy-${{ matrix.settings.target }}
+          file: release/mproxy-${{ matrix.settings.target }}
+          tag: ${{ github.ref }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
