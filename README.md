@@ -45,8 +45,12 @@ Install [Rust 1.70+](https://www.rust-lang.org/),
 [Node v18](https://nodejs.org/), [NPM v9](https://www.npmjs.com/), and
 [mprocs](https://github.com/pvolok/mprocs). Then, run
 ```shell
-cd web && npm install && cd ../
+cd web && npm ci && cd ../
+cd develop && ./run_mqtt.sh && cd ../
 mprocs
+
+# this is check MQTT agent if is OK
+cd agent && cargo run --example publish_command.rs
 ```
 
 ## 限制

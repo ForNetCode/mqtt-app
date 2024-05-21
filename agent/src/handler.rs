@@ -1,26 +1,9 @@
 use std::io::{BufRead, BufReader};
-use serde::{Deserialize, Serialize};
 use tokio::sync::broadcast;
 use tracing::{info};
 use crate::connection::Connection;
-use std::process::Command;
-
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-#[serde(tag = "type")]
-pub enum RequestMessage {
-    Cmd {
-        command: String,
-        request_id: String,
-    }
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-#[serde(tag = "type")]
-pub enum ResponseMessage {
-    Ok{ request_id:String, seq:u32, data:String, pid:u32},
-    Err{ request_id:String, message:String}
-}
+use std::process::{Command, Stdio};
+use crate::message::{RequestMessage, ResponseMessage};
 
 
 type Receiver = broadcast::Receiver<(String,RequestMessage)>;
@@ -44,7 +27,9 @@ impl Handler {
             match cmd {
                 RequestMessage::Cmd { command,request_id } => {
                     let mut seq:u32 = 1;
-                    match Command::new(&command).spawn() {
+                    let mut command = Command::new(&command);
+                    command.stdout(Stdio::piped()).stderr(Stdio::piped());
+                    match command.spawn() {
                         Ok(mut child) => {
                             let pid = child.id();
                             if let Some(stdout) = child.stdout.take() {
@@ -70,7 +55,7 @@ impl Handler {
 #[cfg(test)]
 mod test {
     use std::io::{BufRead, BufReader};
-    use std::process::Command;
+    use std::process::{Command, Stdio};
     use std::time::Duration;
 
     use super::RequestMessage;
@@ -85,15 +70,19 @@ mod test {
 
     #[test]
     pub fn parse() {
-        let mut child = Command::new("top")
+        let mut cmd = Command::new("ls");
+        cmd.stdout(Stdio::piped()).stderr(Stdio::piped());
+        let mut child = cmd
             .spawn().unwrap();
+
+
         if let Some(stdout) = child.stdout.take() {
             let reader = BufReader::new(stdout);
             reader.lines().filter_map(|line| line.ok()).for_each(|line| println!("{}", line));
         }
 
         println!("pid:{}",child.id());
-        std::thread::sleep(Duration::from_secs(10));
+        //std::thread::sleep(Duration::from_secs(10));
         child.kill().unwrap()
 
     }

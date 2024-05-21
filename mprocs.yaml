@@ -1,8 +1,10 @@
 procs:
-  mqtt:
-    shell: cd develop && ./run_mqtt.sh
+  #mqtt:
+  #  shell: cd develop && ./run_mqtt.sh
   mproxy:
-    shell: cd agent && cargo run -- config.toml
+    env:
+      RUST_LOG: debug
+    shell: cd agent && cargo run -- $(pwd)/config.yml
   web:
     shell: cd web && npm run dev
     stop: SIGKILL

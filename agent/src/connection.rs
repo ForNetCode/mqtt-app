@@ -7,7 +7,7 @@ use tokio::sync::broadcast;
 use tracing::{debug, error, info, warn};
 
 use crate::config::Config;
-use crate::handler::{RequestMessage, ResponseMessage};
+use crate::message::{RequestMessage, ResponseMessage};
 
 #[derive(Clone, Debug)]
 pub struct Connection {
