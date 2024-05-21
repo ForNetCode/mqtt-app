@@ -16,6 +16,9 @@ async fn main() -> anyhow::Result<()> {
     };
 
     let config_path:PathBuf = "./config.yml".parse().unwrap();
+    let publish_client_id = "test_web";
+    let password:Option<String> = None;
+    let username:Option<String> = None;
 
     let is_terminal = std::io::stdout().is_terminal();
 
@@ -24,8 +27,11 @@ async fn main() -> anyhow::Result<()> {
 
     let config = mproxy::config::Config::new(Some(config_path)).unwrap();
 
-    let mqtt_url = format!("{}?client_id={}", &config.server, "test_web");
-    let options = MqttOptions::parse_url(&mqtt_url).unwrap();
+    let mqtt_url = format!("{}?client_id={}", &config.server, publish_client_id);
+    let mut options = MqttOptions::parse_url(&mqtt_url).unwrap();
+    if matches!(password, Some(_)) && matches!(username, Some(_)) {
+        options.set_credentials(username.unwrap(), password.unwrap());
+    }
     let (client, mut eventloop) = AsyncClient::new(options,20);
 
     let topic = config.get_response_command_topic();
