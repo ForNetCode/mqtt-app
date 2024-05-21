@@ -57,4 +57,5 @@ jobs:
           asset_name: mproxy-${{ matrix.settings.target }}
           file: release/mproxy
           tag: ${{ github.ref }}
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          repo_token: ${{ secrets.GITHUB_TOKEN
+          draft: true
