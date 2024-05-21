@@ -38,7 +38,7 @@
 }
 ```
 ### 配置文件
-
+参考 [config.yml](./agent/config.yml)
 
 ### 开发
 Install [Rust 1.70+](https://www.rust-lang.org/),
@@ -52,7 +52,7 @@ mprocs
 # this is check MQTT agent if is OK
 cd agent && cargo run --example publish_command.rs
 ```
-
+Web [Figma UI](https://www.figma.com/design/iyL4dms3B8AWGZS14FCRuf/RMQTT-EXEC?m=dev&node-id=0%3A1&t=aXOx1pkofASiwbPa-1)
 ## 限制
 目前只支持普通的命令, 不支持 `sudo xxx` 之类命令。
 

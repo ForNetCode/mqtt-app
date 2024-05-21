@@ -1,2 +1,4 @@
-server: 'mqtt://127.0.0.1:1883'
-client_id: test_client
+server: 'mqtt://127.0.0.1:1883'  # MQTT Server
+client_id: test_client #MQTT Client ID
+#username: test  #MQTT Username
+#password: password  #MQTT Password
