@@ -1,4 +1,5 @@
 use std::env;
+use std::io::IsTerminal;
 use std::path::PathBuf;
 use rumqttc::v5::{AsyncClient, MqttOptions, Incoming};
 use rumqttc::v5::mqttbytes::QoS;
@@ -16,9 +17,10 @@ async fn main() -> anyhow::Result<()> {
 
     let config_path:PathBuf = "./config.yml".parse().unwrap();
 
-    let is_atty = atty::is(atty::Stream::Stdout);
+    let is_terminal = std::io::stdout().is_terminal();
+
     tracing_subscriber::fmt().with_env_filter(EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::from("debug")),)
-        .with_ansi(is_atty).init();
+        .with_ansi(is_terminal).init();
 
     let config = mproxy::config::Config::new(Some(config_path)).unwrap();
 

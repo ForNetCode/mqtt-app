@@ -1,5 +1,4 @@
-
-
+use std::io::IsTerminal;
 use anyhow::Context;
 use clap::{Parser, ArgGroup};
 use std::path::PathBuf;
@@ -33,10 +32,10 @@ async fn main() -> anyhow::Result<()> {
         }
     });
 
-    let is_atty = atty::is(atty::Stream::Stdout);
+    let is_terminal = std::io::stdout().is_terminal();
 
     tracing_subscriber::fmt().with_env_filter(EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::from("info")),)
-        .with_ansi(is_atty).init();
+        .with_ansi(is_terminal).init();
 
     let config = mproxy::config::Config::new(ops.config_path).with_context(|| "Config can not load")?;
 
