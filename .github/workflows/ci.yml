@@ -1,8 +1,8 @@
 name: CI
 on:
-#  push:
-#    tags:
-#      - '*'
+  push:
+    tags:
+      - '*'
   workflow_dispatch:
 jobs:
   build_bin:
@@ -55,6 +55,6 @@ jobs:
         uses: svenstaro/upload-release-action@v2
         with:
           asset_name: mproxy-${{ matrix.settings.target }}
-          file: release/mproxy-${{ matrix.settings.target }}
+          file: agent/release/mproxy-${{ matrix.settings.target }}
           tag: ${{ github.ref }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
