@@ -1,6 +1,6 @@
 procs:
-  #mqtt:
-  #  shell: cd develop && ./run_mqtt.sh
+  rmqtt:
+    shell: docker logs -f --tail 50 rmqtt
   mproxy:
     env:
       RUST_LOG: debug
