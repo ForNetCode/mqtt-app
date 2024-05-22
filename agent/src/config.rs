@@ -14,7 +14,6 @@ pub struct Config {
     pub client_id: String,
     pub username: Option<String>,
     pub password: Option<String>,
-
 }
 
 impl Config {
@@ -48,6 +47,40 @@ impl Config {
         self.command_topic.clone().unwrap_or_else(||format!("cmd/{}/resp",  self.client_id))
     }
 }
+
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct CtrlConfig {
+    pub server: String,
+    pub client_id: String,
+    pub username: Option<String>,
+    pub password: Option<String>,
+    pub subscribe_client_id: String,
+    publish_command_topic: Option<String>,
+    subscribe_command_topic: Option<String>,
+}
+impl CtrlConfig {
+    pub fn new(config_path:PathBuf) -> anyhow::Result<Self> {
+        if !config_path.is_file() {
+            bail!("config file not found: {:?}", config_path);
+        }
+        info!("load config from {:?}", config_path);
+        let config = std::fs::read_to_string(config_path)?;
+        let config: Self = serde_yml::from_str(&config)?;
+        Ok(config)
+    }
+
+    pub fn get_publish_command_topic(&self) -> String {
+        self.publish_command_topic.clone().unwrap_or_else(||format!("cmd/{}", self.subscribe_client_id))
+
+    }
+    pub fn get_subscribe_command_topic(&self) ->  String {
+        self.subscribe_command_topic.clone().unwrap_or_else(||format!("cmd/{}/resp",  self.subscribe_client_id))
+    }
+}
+
+
+
 
 #[cfg(test)]
 mod test {

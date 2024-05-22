@@ -15,29 +15,24 @@ async fn main() -> anyhow::Result<()> {
       "ls -ls".to_string()
     };
 
-    let username:Option<String> = None;
-    let password:Option<String> = None;
-
-    let config_path:PathBuf = "./config.yml".parse().unwrap();
-    let publish_client_id = "root";
-    //let username:Option<String> = Some("".to_string());
-    //let password:Option<String> = Some("".to_string());
+    let config_path:PathBuf = "./ctrl_config.yml".parse().unwrap();
+    //let config_path:PathBuf = "./config.prod.yml".parse().unwrap();
 
     let is_terminal = std::io::stdout().is_terminal();
 
     tracing_subscriber::fmt().with_env_filter(EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::from("debug")),)
         .with_ansi(is_terminal).init();
 
-    let config = mproxy::config::Config::new(Some(config_path)).unwrap();
+    let config = mproxy::config::CtrlConfig::new(config_path).unwrap();
 
-    let mqtt_url = format!("{}?client_id={}", &config.server, publish_client_id);
+    let mqtt_url = format!("{}?client_id={}", &config.server, &config.client_id);
     let mut options = MqttOptions::parse_url(&mqtt_url).unwrap();
-    if matches!(password, Some(_)) && matches!(username, Some(_)) {
-        options.set_credentials(username.unwrap(), password.unwrap());
+    if matches!(config.username, Some(_)) && matches!(config.password, Some(_)) {
+        options.set_credentials(config.username.clone().unwrap(), config.password.clone().unwrap());
     }
     let (client, mut eventloop) = AsyncClient::new(options,20);
 
-    let topic = config.get_response_command_topic();
+    let topic = config.get_subscribe_command_topic();
     client.subscribe(topic, QoS::ExactlyOnce).await?;
 
     tokio::spawn(async move {
@@ -63,7 +58,7 @@ async fn main() -> anyhow::Result<()> {
     });
     let command = RequestMessage::Cmd{command: command.to_string(), request_id: "test_request_id".to_string()};
     let command = serde_json::to_vec(&command).unwrap();
-    client.publish(config.get_command_topic(), QoS::ExactlyOnce, false, command).await?;
+    client.publish(config.get_publish_command_topic(), QoS::ExactlyOnce, false, command).await?;
     tokio::signal::ctrl_c().await?;
 
     Ok(())
