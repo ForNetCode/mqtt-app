@@ -15,8 +15,8 @@ async fn main() -> anyhow::Result<()> {
       "ls -ls".to_string()
     };
 
-    let config_path:PathBuf = "./ctrl_config.yml".parse().unwrap();
-    //let config_path:PathBuf = "./config.prod.yml".parse().unwrap();
+    //let config_path:PathBuf = "./ctrl_config.yml".parse().unwrap();
+    let config_path:PathBuf = "./config.prod.yml".parse().unwrap();
 
     let is_terminal = std::io::stdout().is_terminal();
 
