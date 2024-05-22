@@ -74,7 +74,6 @@ impl Handler {
 mod test {
     use std::io::{BufRead, BufReader};
     use std::process::{Command, Stdio};
-    use std::time::Duration;
 
     use super::RequestMessage;
 
@@ -90,6 +89,16 @@ mod test {
     fn parse() {
         let v = shellish_parse::parse("ls -ls #tes",false).unwrap();
         println!("{v:?}");
+    }
+
+    #[test]
+    fn parse_pipe_command() {
+        let v = shellish_parse::multiparse("cat /etc/hosts|grep 127.0.0.1 #tes", false, &["&&", "||", "&", "|", ";"]).unwrap();
+        println!("{v:?}");
+    }
+    #[test]
+    fn run_pipe_command() {
+        
     }
 
     #[test]
