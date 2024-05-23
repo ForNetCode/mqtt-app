@@ -7,7 +7,7 @@ on:
 jobs:
   build_bin:
     strategy:
-      max-parallel: 1
+      max-parallel: 3
       fail-fast: true
       matrix:
         settings:
@@ -53,6 +53,7 @@ jobs:
 
       - name: Upload artifact
         uses: actions/upload-artifact@v2
+        if: ${{ ! startsWith(github.ref, 'refs/tags/') }}
         with:
           name: mproxy-${{ matrix.settings.target }}
           path: release/*
