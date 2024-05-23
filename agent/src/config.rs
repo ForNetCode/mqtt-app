@@ -1,5 +1,5 @@
-use anyhow::bail;
-use etcetera::BaseStrategy;
+use std::env;
+use anyhow::{bail, Context};
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 use tracing::info;
@@ -18,7 +18,11 @@ pub struct Config {
 
 impl Config {
     pub fn new(config_path: Option<PathBuf>) -> anyhow::Result<Self> {
-        let config_path = config_path.unwrap_or_else(|| Self::get_default_config_path());
+        let config_path = if let Some(config_path)= config_path {
+            config_path
+        } else {
+            Self::get_default_config_path()?
+        };
         if !config_path.is_file() {
             bail!("config file not found: {:?}", config_path);
         }
@@ -28,16 +32,11 @@ impl Config {
         Ok(config)
     }
 
-    fn get_default_config_path() -> PathBuf {
-        let path = etcetera::choose_base_strategy()
-            .unwrap()
-            .config_dir()
-            .join(APP_NAME);
-        if !path.exists() {
-            std::fs::create_dir_all(&path).unwrap();
-        }
-        path
+    fn get_default_config_path() -> anyhow::Result<PathBuf> {
+        let path = get_exec_path()?;
+        Ok(path.join(format!("{APP_NAME}.yml")))
     }
+
 
     pub fn get_command_topic(&self) -> String {
         self.command_topic.clone().unwrap_or_else(||format!("cmd/{}", self.client_id))
@@ -47,6 +46,8 @@ impl Config {
         self.command_topic.clone().unwrap_or_else(||format!("cmd/{}/resp",  self.client_id))
     }
 }
+
+pub const CTRL_APP_NAME: &str = "mpublish";
 
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -60,14 +61,24 @@ pub struct CtrlConfig {
     subscribe_command_topic: Option<String>,
 }
 impl CtrlConfig {
-    pub fn new(config_path:PathBuf) -> anyhow::Result<Self> {
+    pub fn new(config_path:Option<PathBuf>) -> anyhow::Result<Self> {
+        let config_path = if let Some(config_path)= config_path {
+            config_path
+        } else {
+            Self::get_default_config_path()?
+        };
         if !config_path.is_file() {
             bail!("config file not found: {:?}", config_path);
         }
-        info!("load config from {:?}", config_path);
+        info!("load ctrl config from {:?}", config_path);
         let config = std::fs::read_to_string(config_path)?;
         let config: Self = serde_yml::from_str(&config)?;
         Ok(config)
+    }
+
+    fn get_default_config_path() -> anyhow::Result<PathBuf> {
+        let path = get_exec_path()?;
+        Ok(path.join(format!("{CTRL_APP_NAME}.yml")))
     }
 
     pub fn get_publish_command_topic(&self) -> String {
@@ -81,6 +92,13 @@ impl CtrlConfig {
 
 
 
+fn get_exec_path() -> anyhow::Result<PathBuf>{
+    let path = env::current_exe().with_context(||"can not get exe path")?;
+    if let Some(path) = path.parent() {
+        return Ok(path.to_path_buf())
+    }
+    bail!("can not get current exe path");
+}
 
 #[cfg(test)]
 mod test {

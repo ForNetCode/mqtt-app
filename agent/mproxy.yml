@@ -1,0 +1,6 @@
+server: 'mqtt://127.0.0.1:1883'  # MQTT Server
+client_id: test_client #MQTT Client ID
+#username: test  #MQTT Username
+#password: password  #MQTT Password
+#command_topic: cmd/$client_id #subscribe MQTT topic, listen command message， default value is cmd/$client_id
+#response_command_topic: cmd/$client_id/resp #the topic to publish the command result

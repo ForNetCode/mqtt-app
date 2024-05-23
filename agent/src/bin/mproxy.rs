@@ -7,7 +7,7 @@ use tracing_subscriber::EnvFilter;
 
 #[derive(Parser, Debug)]
 #[clap(name = mproxy::config::APP_NAME, version = env!("CARGO_PKG_VERSION"))]
-#[clap(group(ArgGroup::new("cmds").required(true).args(&["CONFIG"]),))]
+#[clap(group(ArgGroup::new("cmds").args(&["CONFIG"]),))]
 struct Cli {
     #[clap(value_parser, name = "CONFIG")]
     pub config_path: Option<PathBuf>,
@@ -54,9 +54,16 @@ mod test {
     fn parse_cli() {
         let result = Cli::parse_from([APP_NAME, "config.yaml"]);
         println!("{:?}", result);
-        let result = Cli::parse_from([APP_NAME, "--version"]);
+        //let result = Cli::parse_from([APP_NAME, "--version"]);
+        //println!("{:?}", result);
+        //let result = Cli::parse_from([APP_NAME, "--help"]);
+        //println!("{:?}", result);
+
+        let result = Cli::parse_from([APP_NAME, "--", "config.yaml"]);
         println!("{:?}", result);
-        let result = Cli::parse_from([APP_NAME, "--help"]);
+
+        let result = Cli::parse_from([APP_NAME, "--config=config.yaml"]);
         println!("{:?}", result);
+
     }
 }

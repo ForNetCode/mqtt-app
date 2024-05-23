@@ -1,29 +1,37 @@
 use std::env;
 use std::io::IsTerminal;
 use std::path::PathBuf;
+use anyhow::bail;
+use clap::Parser;
 use rumqttc::v5::{AsyncClient, MqttOptions, Incoming};
 use rumqttc::v5::mqttbytes::QoS;
 use tracing_subscriber::EnvFilter;
 use mproxy::message::{RequestMessage, ResponseMessage};
+use mproxy::config::CTRL_APP_NAME;
+
+
+#[derive(Parser, Debug)]
+#[clap(name = CTRL_APP_NAME, version = env!("CARGO_PKG_VERSION"))]
+struct Cli {
+    #[arg(short, long, value_name = "FILE")]
+    pub config: Option<PathBuf>,
+    pub command: Vec<String>,
+}
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    let args:Vec<String> = env::args().collect();
-    let command = if args.len() > 1 {
-        args.iter().skip(1).map(|x|x.to_string()).collect::<Vec<_>>().join(" ")
-    } else {
-      "ls -ls".to_string()
-    };
-
-    //let config_path:PathBuf = "./ctrl_config.yml".parse().unwrap();
-    let config_path:PathBuf = "./config.prod.yml".parse().unwrap();
+    let cli = Cli::parse();
+    if cli.command.is_empty() {
+        bail!("no command could be sent to MQTT");
+    }
+    let command = cli.command.join(" ");
 
     let is_terminal = std::io::stdout().is_terminal();
 
     tracing_subscriber::fmt().with_env_filter(EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::from("debug")),)
         .with_ansi(is_terminal).init();
 
-    let config = mproxy::config::CtrlConfig::new(config_path).unwrap();
+    let config = mproxy::config::CtrlConfig::new(cli.config).unwrap();
 
     let mqtt_url = format!("{}?client_id={}", &config.server, &config.client_id);
     let mut options = MqttOptions::parse_url(&mqtt_url).unwrap();
@@ -62,4 +70,26 @@ async fn main() -> anyhow::Result<()> {
     tokio::signal::ctrl_c().await?;
 
     Ok(())
+}
+
+#[cfg(test)]
+mod test{
+
+    use clap::Parser;
+    use crate::Cli;
+
+    const APP_NAME:&str = mproxy::config::CTRL_APP_NAME;
+    #[test]
+    fn test_cli_01() {
+
+        let config = Cli::parse_from([APP_NAME,"--config=config", "ls", "pwd"]);
+        println!("{config:?}");
+
+        let config = Cli::parse_from([APP_NAME, "-c","config.yaml", "ls", "pwd"]);
+        println!("{config:?}");
+
+        let config = Cli::parse_from([APP_NAME, "-c","config.yaml"]);
+        println!("{config:?}");
+
+    }
 }
