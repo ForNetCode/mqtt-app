@@ -32,8 +32,9 @@
 # Web websocket-mqtt send
 # publish topic:  cmd/$clientId
 {
-  cmd: "ls",
+  command: "ls",
   requestId: "random_to_track",
+  t: "Cmd"        
   #stream: false， # can be empty, default is false. this project now only support false.
 }
 
@@ -41,17 +42,23 @@
 # publish topic: cmd/$client/resp
 # success response        
 {
-  type: "Ok"      
+  t: "D"      
   data: "abc.txt/nccn.txt",
-  requestId: "random_to_track",
+  reqId: "random_to_track",
   pid: 39512, #process id
   seq: 1 #some may resp more than one time, so set seq to keep order.
 }
 # failure response
 {
-  type: "Err",
+  t: "Err",
   message: "response data"
-  requestId: "random_to_track"
+  reqId: "random_to_track"
+}
+# finish response
+{
+  t: "Ok",
+  reqId: "random_to_track",
+  pid: 39512, #process id
 }
 ```
 ### 配置文件
@@ -67,7 +74,7 @@ cd shell && ./run_mqtt.sh && cd ../
 mprocs
 
 # Check MQTT agent if is OK
-cd agent && cargo run --bin mpublish -- --config=mpublish.yml ls -ls
+cd agent && cargo run --bin mpublish -- --config=mpublish.yml -- ls -ls
 ```
 Web [Figma UI](https://www.figma.com/design/iyL4dms3B8AWGZS14FCRuf/RMQTT-EXEC?node-id=0%3A1&t=rnIL1LSWwQIXfZdf-1)
 ## 限制

@@ -23,12 +23,12 @@ impl Handler {
 
     async fn run_command(connection:Arc<Connection>, cmd:RequestMessage, publish_topic:Arc<String>) {
         match cmd {
-            RequestMessage::Cmd { command,request_id } => {
+            RequestMessage::Cmd { command, req_id: request_id } => {
                 let command_parsed = shellish_parse::parse(&command,false);
                 let command_parsed = match command_parsed {
                     Ok(result) => result,
                     Err(e) => {
-                        let _ = connection.publish_response(&publish_topic,  ResponseMessage::Err {request_id: request_id.clone(), message:format!("{}", e)}).await;
+                        let _ = connection.publish_response(&publish_topic,  ResponseMessage::Err {req_id: request_id.clone(), message:format!("{}", e)}).await;
                         return;
                     }
                 };
@@ -46,13 +46,14 @@ impl Handler {
                             for line in reader.lines().filter_map(|line| line.ok()) {
                                 //TODO: handle publish error
                                 let _ = connection.publish_response(
-                                    &publish_topic, ResponseMessage::Ok {request_id: request_id.clone(),data:line, seq: seq, pid: pid}).await;
+                                    &publish_topic, ResponseMessage::D { req_id: request_id.clone(),data:line, seq, pid }).await;
                                 seq +=1;
                             }
                         }
+                        let _ = connection.publish_response(&publish_topic, ResponseMessage::Ok { req_id: request_id, pid}).await;
                     }
                     Err(e) => {
-                        let _ = connection.publish_response(&publish_topic,  ResponseMessage::Err {request_id: request_id.clone(), message:format!("{}", e)}).await;
+                        let _ = connection.publish_response(&publish_topic,  ResponseMessage::Err {req_id: request_id.clone(), message:format!("{}", e)}).await;
                     }
                 }
             }

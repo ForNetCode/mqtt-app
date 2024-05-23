@@ -5,6 +5,6 @@ procs:
     env:
       RUST_LOG: debug
     shell: cd agent && cargo run --bin mproxy mproxy.yml
-  web:
-    shell: cd web && npm run dev
-    stop: SIGKILL
+#  web:
+#    shell: cd web && npm run dev
+#    stop: SIGKILL

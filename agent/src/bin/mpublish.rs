@@ -1,6 +1,7 @@
 use std::env;
 use std::io::IsTerminal;
 use std::path::PathBuf;
+use std::process::exit;
 use anyhow::bail;
 use clap::Parser;
 use rumqttc::v5::{AsyncClient, MqttOptions, Incoming};
@@ -43,6 +44,7 @@ async fn main() -> anyhow::Result<()> {
     let topic = config.get_subscribe_command_topic();
     client.subscribe(topic, QoS::ExactlyOnce).await?;
 
+    let client_ = client.clone();
     tokio::spawn(async move {
         loop {
             let event = eventloop.poll().await;
@@ -51,10 +53,17 @@ async fn main() -> anyhow::Result<()> {
                     match event {
                         rumqttc::v5::Event::Incoming(Incoming::Publish(data)) => {
                             let resp: ResponseMessage = serde_json::from_slice(data.payload.as_ref()).unwrap();
-
                             match resp {
-                                ResponseMessage::Ok {data, seq, pid, ..} => println!("[{pid}][{seq}] {data}"),
-                                ResponseMessage::Err {message,..} => eprintln!("{message}"),
+                                ResponseMessage::D {data, seq, pid, ..} => println!("[{pid}][{seq}] {data}"),
+                                ResponseMessage::Err {message,..} => {
+                                    eprintln!("{message}");
+                                    let _ = client_.disconnect().await;
+                                    exit(1);
+                                },
+                                ResponseMessage::Ok {..} => {
+                                    let _ = client_.disconnect().await;
+                                    exit(0);
+                                }
                             }
                         }
                         _ => ()
@@ -64,7 +73,7 @@ async fn main() -> anyhow::Result<()> {
             };
         }
     });
-    let command = RequestMessage::Cmd{command: command.to_string(), request_id: "test_request_id".to_string()};
+    let command = RequestMessage::Cmd{command: command.to_string(), req_id: "test_request_id".to_string()};
     let command = serde_json::to_vec(&command).unwrap();
     client.publish(config.get_publish_command_topic(), QoS::ExactlyOnce, false, command).await?;
     tokio::signal::ctrl_c().await?;
@@ -85,10 +94,10 @@ mod test{
         let config = Cli::parse_from([APP_NAME,"--config=config", "ls", "pwd"]);
         println!("{config:?}");
 
-        let config = Cli::parse_from([APP_NAME, "-c","config.yaml", "ls", "pwd"]);
+        let config = Cli::parse_from([APP_NAME, "-c","config.yaml", "ls -ls"]);
         println!("{config:?}");
 
-        let config = Cli::parse_from([APP_NAME, "-c","config.yaml"]);
+        let config = Cli::parse_from([APP_NAME, "-c","config.yaml", "--", "ls", "-ls"]);
         println!("{config:?}");
 
     }
