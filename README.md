@@ -14,9 +14,9 @@
 ./mproxy mproxy.yml
 
 # 向 mproxy 分发指令 
-./mpublish ls -ls
+./mpublish -- ls -ls
 # or run with config
-./mpublish --config=mpublish.conf ls -ls
+./mpublish --config=mpublish.conf -- ls -ls
 
 ```
 
