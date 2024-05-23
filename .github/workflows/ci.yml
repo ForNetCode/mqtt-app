@@ -7,7 +7,6 @@ on:
 jobs:
   build_bin:
     strategy:
-      max-parallel: 3
       fail-fast: true
       matrix:
         settings:
@@ -52,9 +51,16 @@ jobs:
         run: ${{ matrix.settings.build }}
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         if: ${{ ! startsWith(github.ref, 'refs/tags/') }}
         with:
           name: mproxy-${{ matrix.settings.target }}
           path: release/*
           if-no-files-found: error
+      - name: Create Release
+        uses: ncipollo/release-action@v1
+        if: ${{ ! startsWith(github.ref, 'refs/tags/') }}
+        with:
+          artifacts: mproxy-*
+          token: ${{ secrets.YOUR_GITHUB_TOKEN }}
+          draft: true
