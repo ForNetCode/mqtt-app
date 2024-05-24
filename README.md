@@ -4,19 +4,19 @@
 相比于VPN，该项目代码可集成到只有 MQTT 交互的设备上，本项目的价值在于参考实现。
 
 ## 快速开始
-1. 下载bin文件：[release page](./releases), `mproxy` `mpublish`
-2. 跑mqtt server， [这里](./shell/dev) 有如何快速跑测试 rmqtt 的例子，执行 `run_rmqtt.sh` 即可，生产环境参考 [prod](./shell/dev) 目录下的配置。
-3. 编写配置文件：`mproxy.yml`,`mpublish.yml`, 可参考[agent](./tree/master/agent) 目录下的同名文件，两者要和并文件放在同一个目录下。 
+1. 下载压缩包：[release page](./releases), 解压缩，并 chmod a+x `mproxy` `mpublish`
+2. 跑mqtt server， [这里](./shell/dev) 有如何快速跑测试 rmqtt 的例子，执行 `run_rmqtt.sh` 即可，生产环境参考 [prod](./shell/prod) 目录下的配置。
+3. 编写配置文件：`mproxy.yml`,`mpublish.yml`, 可参考[agent](./agent) 目录下的同名文件，两者要和bin文件放在同一个目录下。 
 ```sh
 # 执行 mproxy
 ./mproxy 
 # or run with config
-./mproxy mproxy.yml
+./mproxy where/path/mproxy.yml
 
 # 向 mproxy 分发指令 
 ./mpublish -- ls -ls
 # or run with config
-./mpublish --config=mpublish.conf -- ls -ls
+./mpublish --config=where/path/mpublish.conf -- ls -ls
 
 ```
 
@@ -24,7 +24,7 @@
 
 在宿主上运行 `mproxy` 命令行可执行程序，通过 MQTT 连接 MQTT Server，并订阅 command 主题消息。
     
-浏览器通过 MQTT Websocket 连接 MQTT，获取订阅消息并展示。
+`mpublish`，通过MQTT发布指令消息到`mproxy`的订阅上，并获取指令返回值展示。
 
 ### 协议交互
 交互协议走 json 字符串。
@@ -34,7 +34,7 @@
 {
   command: "ls",
   requestId: "random_to_track",
-  t: "Cmd"        
+  t: "Cmd"
   //stream: false， // can be empty, default is false. this project now only support false.
 }
 ```
@@ -43,7 +43,7 @@
 // publish topic: cmd/$client/resp
 // success response        
 {
-  t: "D",     
+  t: "D",
   data: "abc.txt/nccn.txt",
   reqId: "random_to_track",
   pid: 39512, //process id
@@ -73,10 +73,8 @@ mpublish 默认配置文件为当前目录 mpublish.yml
 
 ## 开发
 Install [Rust 1.70+](https://www.rust-lang.org/),
-[Node v18](https://nodejs.org/), [NPM v9](https://www.npmjs.com/), and
-[mprocs](https://github.com/pvolok/mprocs). Then, run
+[mprocs](https://github.com/pvolok/mprocs). Then run
 ```shell
-cd web && npm ci && cd ../
 cd shell/dev && ./run_mqtt.sh && cd ../../
 mprocs
 
