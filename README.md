@@ -29,36 +29,41 @@
 ### 协议交互
 交互协议走 json 字符串。
 ```json5
-# Web websocket-mqtt send
-# publish topic:  cmd/$clientId
+// Web websocket-mqtt send
+// publish topic:  cmd/$clientId
 {
   command: "ls",
   requestId: "random_to_track",
   t: "Cmd"        
-  #stream: false， # can be empty, default is false. this project now only support false.
+  //stream: false， // can be empty, default is false. this project now only support false.
 }
-
-# mproxy response
-# publish topic: cmd/$client/resp
-# success response        
+```
+```json5
+// mproxy response
+// publish topic: cmd/$client/resp
+// success response        
 {
-  t: "D"      
+  t: "D",     
   data: "abc.txt/nccn.txt",
   reqId: "random_to_track",
-  pid: 39512, #process id
-  seq: 1 #some may resp more than one time, so set seq to keep order.
+  pid: 39512, //process id
+  seq: 1 //some may resp more than one time, so set seq to keep order.
 }
-# failure response
+```
+```json5
+// failure response
 {
   t: "Err",
-  message: "response data"
+  message: "response data",
   reqId: "random_to_track"
 }
-# finish response
+```
+```json5
+// finish response
 {
   t: "Ok",
   reqId: "random_to_track",
-  pid: 39512, #process id
+  pid: 39512, //process id
 }
 ```
 ### 配置文件
