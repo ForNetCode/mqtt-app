@@ -94,4 +94,4 @@ Web [Figma UI](https://www.figma.com/design/iyL4dms3B8AWGZS14FCRuf/RMQTT-EXEC?no
 2. 创建配置文件 `/etc/mproxy/mproxy.xml`
 3. 将此文件 [./shell/mproxy.service](./shell/mproxy.service)  拷贝到 `/etc/systemd/system/mproxy.service`
 4. 重启 systemd `systemctl daemon-reload`
-5. `systemctl enable fornet`, `systemctl start fornet`
+5. `systemctl enable mproxy`, `systemctl start mproxy`
