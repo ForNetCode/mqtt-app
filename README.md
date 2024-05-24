@@ -5,7 +5,7 @@
 
 ## 快速开始
 1. 下载bin文件：[release page](./releases), `mproxy` `mpublish`
-2. 跑mqtt server， [这里](./tree/master/shell) 有如何快速跑测试 rmqtt 的例子，执行 `run_rmqtt.sh` 即可，生产环境参考 prod 目录下的配置。
+2. 跑mqtt server， [这里](./shell/dev) 有如何快速跑测试 rmqtt 的例子，执行 `run_rmqtt.sh` 即可，生产环境参考 [prod](./shell/dev) 目录下的配置。
 3. 编写配置文件：`mproxy.yml`,`mpublish.yml`, 可参考[agent](./tree/master/agent) 目录下的同名文件，两者要和并文件放在同一个目录下。 
 ```sh
 # 执行 mproxy
@@ -63,14 +63,16 @@
 ```
 ### 配置文件
 参考 [mproxy.yml](./agent/mproxy.yml) 和 [mpublish.yml](./agent/mpublish.yml)
+mproxy 默认配置文件为当前目录 mproxy.yml
+mpublish 默认配置文件为当前目录 mpublish.yml
 
-### 开发
+## 开发
 Install [Rust 1.70+](https://www.rust-lang.org/),
 [Node v18](https://nodejs.org/), [NPM v9](https://www.npmjs.com/), and
 [mprocs](https://github.com/pvolok/mprocs). Then, run
 ```shell
 cd web && npm ci && cd ../
-cd shell && ./run_mqtt.sh && cd ../
+cd shell/dev && ./run_mqtt.sh && cd ../../
 mprocs
 
 # Check MQTT agent if is OK
@@ -80,6 +82,13 @@ Web [Figma UI](https://www.figma.com/design/iyL4dms3B8AWGZS14FCRuf/RMQTT-EXEC?no
 ## 限制
 目前只支持普通的命令, 不支持 `sudo xxx` 需要额外输入，以及 `ls | grep xx` 使用 pipeline 的指令。
 
-### 应用场景举例
+## 应用场景举例
 1. 执行 `sshx`, 暴露 shell 给远端。
 2. 执行 `free -h`, 查看当前服务状况。
+
+## Linux Systemd部署
+1. `chmod a+x mproxy && mv mproxy /usr/local/bin/`
+2. 创建配置文件 `/etc/mproxy/mproxy.xml`
+3. 将此文件 [./shell/mproxy.service](./shell/mproxy.service)  拷贝到 `/etc/systemd/system/mproxy.service`
+4. 重启 systemd `systemctl daemon-reload`
+5. `systemctl enable fornet`, `systemctl start fornet`

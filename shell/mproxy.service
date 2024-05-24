@@ -1,0 +1,12 @@
+[Unit]
+Description=mproxy daemon
+After=network.target
+
+[Service]
+Type=simple
+User=root
+Restart=always
+ExecStart=/usr/local/bin/mproxy /etc/mproxy/config.yml
+
+[Install]
+WantedBy=multi-user.target
