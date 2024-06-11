@@ -1,8 +1,16 @@
-.PHONY: release-mac-x86_64, release-mac-aarch64, release-linux, release-linux-aarch64
+.PHONY: release-mac-x86_64, release-mqtt-util-auth-server, release-mac-aarch64, release-linux, release-linux-aarch64
 
 name = mproxy
 ctrl_name = mpublish
 rust_path = agent
+
+release-mqtt-util-auth-server:
+ifeq ($(VERSION), )
+        $(error VEDRSION is not set)
+else	
+	cd auth-server && DOCKER_BUILDKIT=1 docker build . -t="ghcr.io/fornetcode/mqtt-util-auth-server:$(VERSION)"
+	docker push ghci.io/fornetcode/mqtt-util-auth-server:$(VERSION)
+endif
 
 release-mac-x86_64:
 	mkdir -p release

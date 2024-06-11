@@ -1,0 +1,9 @@
+procs:
+  rmqtt:
+    shell: docker logs -f --tail 50 rmqtt
+  logViewer:
+    shell: cd logViewer && npm run dev
+    stop: SIGKILL
+#  web:
+#    shell: cd web && npm run dev
+#    stop: SIGKILL

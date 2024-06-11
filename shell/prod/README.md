@@ -1,9 +1,7 @@
 ## RMQTT Production Config
 
 相比于开发配置:
-1. 禁用了 websocket socket。
-2. 在 rmqtt-acl 添加了简单的权限配置。
-
+1. 启用了 auth http plugin， 具体实现可参考 [authServer](../../authServer), authServer 部署参考项目 [README.md](../../README.md#mqtt-auth-server)
 
 ### 使用 RMQTT 注意事项
 #### 默认 ACL 注意事项
