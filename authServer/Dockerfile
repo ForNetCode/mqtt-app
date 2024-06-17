@@ -4,9 +4,9 @@
 
 # You can override this `--build-arg BASE_IMAGE=...` to use different
 # version of Rust
-ARG BASE_IMAGE=rust:1.77
+ARG BASE_IMAGE=rust:alpine
 
-ARG RUNTIME_IMAGE=debian:buster-slim
+ARG RUNTIME_IMAGE=alpine
 
 ARG APP_NAME=mqtt-auth-server
 
@@ -21,9 +21,9 @@ RUN --mount=type=cache,target=/usr/local/cargo/registry \
      cargo build --release
 
 FROM ${RUNTIME_IMAGE}
-
-COPY  ./target/release/${APP_NAME} /usr/bin/
-
+RUN apk add --no-cache tini
 EXPOSE 5800
+ENTRYPOINT ["/sbin/tini", "--"]
+CMD ["${APP_NAME}"]
 
-CMD ["./${APP_NAME}"]
+COPY --from=builder ./target/release/${APP_NAME} /usr/bin/
