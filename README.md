@@ -1,6 +1,7 @@
-# MQTT-UTIL
+# MQTT-APP
+本项目包含基于 RMQTT 做的小应用。
 ## MQTT-EXEC
-本项目解决的问题：远程执行 Shell 命令，并查看执行结果。
+本程序解决的问题：远程执行 Shell 命令，并查看执行结果。
 
 相比于VPN，该项目代码可集成到只有 MQTT 交互的设备上，本项目的价值在于参考实现。
 
@@ -99,7 +100,7 @@ cd agent && cargo run --bin mpublish -- --config=mpublish.yml -- ls -ls
 
 
 ## MQTT-LOG
-本项目基于MQTT解决远程查看日志的问题。提供Log Viewer Web 和 SDK（Typescript）。目录为 logViewer。
+本应用基于MQTT解决远程查看日志的问题。提供Log Viewer Web 和 SDK（Typescript）。目录为 `logViewer`。
 
 ### MQTT 协议交互
 ```json5
