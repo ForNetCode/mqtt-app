@@ -35,4 +35,4 @@ jobs:
           push: true
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          tags: ${{ env.REGISTRY }}/fornetcode/mqtt-util-auth-server:${{github.event.inputs.version}}, ${{ env.REGISTRY }}/fornetcode/mqtt-util-auth-server:latest
+          tags: ${{ env.REGISTRY }}/fornetcode/mqtt-auth-server:${{github.event.inputs.version}}, ${{ env.REGISTRY }}/fornetcode/mqtt-auth-server:latest

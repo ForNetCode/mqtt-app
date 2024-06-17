@@ -8,7 +8,7 @@ ARG BASE_IMAGE=rust:1.77
 
 ARG RUNTIME_IMAGE=debian:buster-slim
 
-ARG APP_NAME=mqtt-util-auth-server
+ARG APP_NAME=mqtt-auth-server
 
 # Our first FROM statement declares the build environment.
 FROM ${BASE_IMAGE} AS builder
@@ -18,7 +18,7 @@ ADD . .
 
 # Build our application.
 RUN --mount=type=cache,target=/usr/local/cargo/registry \
-     cargo build --package ${APP_NAME} --release
+     cargo build --release
 
 FROM ${RUNTIME_IMAGE}
 

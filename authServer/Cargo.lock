@@ -668,7 +668,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "mqtt-util-auth-server"
+name = "mqtt-auth-server"
 version = "0.1.0"
 dependencies = [
  "anyhow",

@@ -231,7 +231,7 @@ mprocs -c mprocs.log.yaml
 #### Docker
 ```
 # port is 5800
-docker run -d --network=host --name=auth-server ghcr.io/fornetcode/mqtt-util-auth-server:latest
+docker run -d --network=host --name=auth-server ghcr.io/fornetcode/mqtt-auth-server:latest
 ```
 
 ### 注意
