@@ -15,6 +15,7 @@ FROM ${BASE_IMAGE} AS builder
 
 # Add our source code.
 ADD . .
+RUN apk add --no-cache musl-dev
 
 # Build our application.
 RUN --mount=type=cache,target=/usr/local/cargo/registry \
