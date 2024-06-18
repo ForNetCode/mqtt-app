@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import { RouterProvider, createRouter } from '@tanstack/react-router'
+import {RouterProvider, createRouter, createHashHistory} from '@tanstack/react-router'
 import log from 'loglevel'
 
 import { routeTree } from './routeTree.gen'
@@ -14,6 +14,7 @@ const router = createRouter({
     context: {
         auth: undefined!, // This will be set after we wrap the app in an AuthProvider
     },
+    history: createHashHistory(),
     defaultNotFoundComponent: () => (<p>Not Found</p>)
 })
 

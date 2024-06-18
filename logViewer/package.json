@@ -8,7 +8,10 @@
     "build": "tsc && vite build",
     "test": "vitest",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "upload": "dotenv cross-var spa-client upload ./dist %DOMAIN%",
+    "release": "dotenv cross-var spa-client release %DOMAIN%",
+    "deploy": "npm run build && npm run upload && npm run release"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.4.0",
@@ -55,6 +58,8 @@
     "@typescript-eslint/parser": "^7.2.0",
     "@vitejs/plugin-react": "^4.2.1",
     "autoprefixer": "^10.4.19",
+    "cross-var": "^1.1.0",
+    "dotenv-cli": "^7.4.2",
     "eslint": "^8.57.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.6",

@@ -1,5 +1,4 @@
 import {createFileRoute, redirect,} from '@tanstack/react-router'
-import log from "loglevel";
 import {Button} from "@/components/ui/button.tsx";
 import {Toaster} from "@/components/ui/sonner.tsx";
 import {HamburgerMenuIcon, PlusIcon} from "@radix-ui/react-icons";
@@ -23,7 +22,6 @@ import SimpleLog from "@/components/simpleLog";
 
 export const Route = createFileRoute('/_auth/')({
     beforeLoad: ({context, location}) => {
-        log.info('isAuth', context.auth.isAuthenticated)
         if (!context.auth.isAuthenticated) {
             throw redirect({
                 to: '/login',
