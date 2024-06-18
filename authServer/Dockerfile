@@ -25,6 +25,8 @@ FROM ${RUNTIME_IMAGE}
 RUN apk add --no-cache tini
 EXPOSE 5800
 ENTRYPOINT ["/sbin/tini", "--"]
-CMD ${APP_NAME}
+# cmd can not use ARG
+#CMD ${APP_NAME}
+CMD mqtt-auth-server
 
 COPY --from=builder ./target/release/${APP_NAME} /usr/bin/
