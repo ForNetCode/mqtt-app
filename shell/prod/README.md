@@ -13,5 +13,3 @@ rules = [
 ]
 ```
 2. clientId 会和 user 一一对应，不要随意更改。
-#### 重启
-目前 RMQTT 使用docker restart 重启，会出现端口占用问题 https://github.com/rmqtt/rmqtt/issues/58
