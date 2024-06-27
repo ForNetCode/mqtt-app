@@ -4,8 +4,8 @@ use std::collections::HashMap;
 use tracing::Level;
 use tracing_subscriber::EnvFilter;
 
-const PUBLISH: &str = "1";
-const SUBSCRIBE: &str = "2";
+const PUBLISH: &str = "2";
+const SUBSCRIBE: &str = "1";
 #[handler]
 async fn auth(req: &mut Request, res: &mut Response) {
     let params = match parse_params(req).await {
