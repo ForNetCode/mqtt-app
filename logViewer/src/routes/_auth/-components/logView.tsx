@@ -86,7 +86,7 @@ export default function LogView({topic}:LogViewProps) {
                             <TooltipContent>Clean Log</TooltipContent>
                         </Tooltip>
                         <Tooltip>
-                            <TooltipTrigger onClick={subscribeOrUnSubscribeTopic}>{subscribed? <LinkBreak2Icon />:<Link2Icon/>}</TooltipTrigger>
+                            <TooltipTrigger onClick={subscribeOrUnSubscribeTopic}>{subscribed? <Link2Icon/>:<LinkBreak2Icon />}</TooltipTrigger>
                             <TooltipContent>Subscribe Log</TooltipContent>
                         </Tooltip>
                         <Tooltip>
