@@ -19,5 +19,5 @@ export default defineConfig({
     //environment: 'jsdom',
     include:["./test/**/*.test.ts"],
   },
-  base: './'
+  base: './',
 })

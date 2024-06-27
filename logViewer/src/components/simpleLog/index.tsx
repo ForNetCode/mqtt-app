@@ -25,7 +25,7 @@ export default function SimpleLog({logs}: SimpleLogProps) {
     }, [logs.length]);
 
 
-    return <div className='p-2 overflow-y-auto' ref={scrollRef}>
+    return <div className='p-2 overflow-y-auto text-sm' ref={scrollRef}>
         {logs.map((item, index) => (
             <div className='hover:bg-zinc-100' key={index}>{logItemParser(item)}</div>
         ))
