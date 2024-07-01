@@ -98,6 +98,11 @@ mod test {
         println!("{v:?}");
     }
     #[test]
+    fn test_bash_commands(){
+        let v = shellish_parse::parse("bash -c \"ls |grep a\"", false).unwrap();
+        println!("{v:?}");
+    }
+    #[test]
     fn run_multiple_commands() {
         let mut cmd = Command::new("bash");
         cmd.arg("-c");

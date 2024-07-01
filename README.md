@@ -17,6 +17,7 @@
 
 # 向 mproxy 分发指令 
 ./mpublish -- ls -ls
+./mpublish -- bash -c \"ls \| grep mproxy.yml\"
 # or run with config
 ./mpublish --config=where/path/mpublish.conf -- ls -ls
 
