@@ -66,6 +66,7 @@ export default forwardRef(function VirtualLog<T>({rowHeight, parseLine, height, 
               return []
           },
           scroll(line: number) {
+              console.log('fuck here')
               listRef.current?.scrollToItem(line)
           }
         }

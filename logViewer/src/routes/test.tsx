@@ -7,6 +7,7 @@ import AutoSizer from "react-virtualized-auto-sizer";
 import VirtualLog, {logItemParser, VirtualLogHandlerRef} from "@/components/virtualLog";
 import {useEffect, useRef} from "react";
 import {LogItem} from "@/constants.ts";
+import SearchBar from "@/components/virtualLog/searchBar.tsx";
 
 export const Route = createFileRoute('/test')({
   component: () => <TestCF/>
@@ -73,12 +74,12 @@ function TestCF() {
     return (
         <div>
             <div className='w-full h-[300px]'>
-                <AutoSizer>
-                    { ({height, width}) =>
-                        <VirtualLog width={width} height={height} ref={logRef} parseLine={logItemParser} rowHeight={40}/>
-                    }
-                </AutoSizer>
+
             </div>
+
+            <VirtualLog width={1000} height={300} ref={logRef} parseLine={logItemParser} rowHeight={40}/>
+            <SearchBar logRef={logRef}/>
         </div>
+
     )
 }
