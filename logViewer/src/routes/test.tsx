@@ -1,13 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router'
-// import {Button} from "@/components/ui/button.tsx";
-// import {initClient} from "@/mqtt.ts";
-// import log from "loglevel";
-import AutoSizer from "react-virtualized-auto-sizer";
-
 import VirtualLog, {logItemParser, VirtualLogHandlerRef} from "@/components/virtualLog";
 import {useEffect, useRef} from "react";
 import {LogItem} from "@/constants.ts";
 import SearchBar from "@/components/virtualLog/searchBar.tsx";
+import {ListChildComponentProps} from "react-window";
+import Line from "@/components/virtualLog/line.tsx";
 
 export const Route = createFileRoute('/test')({
   component: () => <TestCF/>
@@ -71,13 +68,28 @@ function TestCF() {
     }, []);
 
 
+    const renderRow = ({index ,style}: ListChildComponentProps<LogItem>, data: LogItem, focus: boolean) => {
+        if(data.searched) {
+            return <Line index={index + 1} style={style} key={index} data={<>searched 123 {focus? 'focus': 'no'}</>}/>
+        }
+        return <Line index={index+1} style={style} key={index} data={logItemParser(data)}/>
+    }
+    const onSearch = (data:LogItem, searchText:string|undefined) => {
+        if(searchText === undefined) {
+            return {data, isSearch: false }
+        }
+        const index = (data.log[0] as string).indexOf(searchText)
+        const isSearch = index !== -1
+        data.searched = isSearch
+        return {
+            data,
+            isSearch,
+        }
+    }
+
     return (
         <div>
-            <div className='w-full h-[300px]'>
-
-            </div>
-
-            <VirtualLog width={1000} height={300} ref={logRef} parseLine={logItemParser} rowHeight={40}/>
+            <VirtualLog width='100%' height={300} ref={logRef} renderRow={renderRow} onSearch={onSearch} rowHeight={40}/>
             <SearchBar logRef={logRef}/>
         </div>
 

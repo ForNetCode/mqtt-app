@@ -8,6 +8,7 @@ export interface LogItem {
     log: Array<any>, //..... array log ,like console, first is message
     num: 0|1|2|3|4, // number to index log level:  trace:0, debug:1,info:2,warn:3,error:4
     name?: string //: 'LoggerName', // undefined or string
+    searched?: boolean,
 }
 
 export enum QoS {

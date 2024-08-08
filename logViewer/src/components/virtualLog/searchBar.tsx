@@ -25,15 +25,14 @@ export default function SearchBar<T>({logRef, className}: SearchBarProps<T>) {
     const [, setState] = useState<SearchState>(defaultSearchBarState)
     const searchTextRef = useRef('')
 
-    const search = (text:string) => {
-        const result = logRef.current?.search(text)
-        console.log('search result:', result)
+    const search = async (text:string) =>  {
+        const result = await logRef.current?.search(text)
         if(result && result.length > 0) {
             setState({
                 resultLines: result,
                 position: 0,
             })
-            logRef.current?.scroll(result[0])
+            logRef.current?.scroll(result[0], true)
         } else {
             setState({
                 resultLines: []
@@ -43,8 +42,8 @@ export default function SearchBar<T>({logRef, className}: SearchBarProps<T>) {
 
     const prevClick = () => {
         setState(({position,resultLines}) => {
-            if(position && position> 0) {
-                logRef.current?.scroll(resultLines[position - 1])
+            if(position!== undefined && position> 0) {
+                logRef.current?.scroll(resultLines[position - 1], true)
                 return {position: position -1 , resultLines}
             }
             return {
@@ -55,12 +54,14 @@ export default function SearchBar<T>({logRef, className}: SearchBarProps<T>) {
 
     const nextClick = () => {
         setState(({position,resultLines}) => {
-            if(position && position < resultLines.length - 1) {
-                logRef.current?.scroll(resultLines[position + 1])
+            console.log(position, resultLines)
+            if(position!== undefined && position < resultLines.length) {
+                console.log('fuck...', position + 1)
+                logRef.current?.scroll(resultLines[position + 1], true)
                 return {position: position +1 ,resultLines}
             }
             return {
-                position,
+                position: position,
                 resultLines
             }
         })
@@ -68,8 +69,8 @@ export default function SearchBar<T>({logRef, className}: SearchBarProps<T>) {
     return (<div className={cn('flex flex-row', className)}>
         <form onSubmit={() => search(searchTextRef.current)}>
             <input onChange={(e) => searchTextRef.current = e.currentTarget.value}/>
-            <Button variant='link' onClick={prevClick}>Prev</Button>
-            <Button variant='link' onClick={nextClick}>Next</Button>
+            <Button variant='link' onClick={prevClick} type='button'>Prev</Button>
+            <Button variant='link' onClick={nextClick} type='button'>Next</Button>
             <Button variant='link' type='submit'>Search</Button>
         </form>
     </div>)

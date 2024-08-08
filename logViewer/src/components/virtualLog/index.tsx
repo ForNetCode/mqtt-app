@@ -1,11 +1,11 @@
 import {forwardRef, ReactElement, Ref, useEffect, useImperativeHandle, useRef, useState} from "react";
 import {ListChildComponentProps, ListOnItemsRenderedProps, VariableSizeList} from "react-window";
-import Line from "./line";
 import {LogItem} from "@/constants.ts";
 
 
 interface PureLogProps<T> {
-    parseLine(lineText:T): ReactElement
+    renderRow(props: ListChildComponentProps<T>, data:T, focus: boolean): ReactElement
+    onSearch(data:T, text: string|undefined): {data:T, isSearch:boolean}
     rowHeight: number
     height: number|string
     width: number|string
@@ -14,26 +14,28 @@ interface PureLogProps<T> {
 export interface VirtualLogHandlerRef<T> {
     newLine(text:T[]): void
     clear(): void
-    search(text:string, ignoreCase?:boolean): number[] // search('') to cancel search //set searching highlight
-    scroll(line: number): void
+    search(text:string, ignoreCase?:boolean): Promise<number[]> // search('') to cancel search //set searching highlight
+    scroll(line: number, focus?: boolean): void
+
 }
 
 
 interface LogState<T> {
-    scrollToIndex: number
     lines: T[]
+    focusLine: number
 }
 
 function defaultLogState<T>():LogState<T> {
     return {
-        scrollToIndex:0,
-        lines: []
+        lines: [],
+        focusLine: -1,
     }
 }
 
+
 // ref: https://github.com/NadiaIdris/ts-log-viewer to more text
 
-export default forwardRef(function VirtualLog<T>({rowHeight, parseLine, height, width}:PureLogProps<T>, ref: Ref<VirtualLogHandlerRef<T>>) {
+export default forwardRef(function VirtualLog<T>({rowHeight, onSearch, renderRow, height, width}:PureLogProps<T>, ref: Ref<VirtualLogHandlerRef<T>>) {
     const [logState, setLogState] = useState<LogState<T>>(defaultLogState)
     const listRef = useRef<VariableSizeList>(null)
     const refState = useRef<ListOnItemsRenderedProps>({
@@ -41,33 +43,47 @@ export default forwardRef(function VirtualLog<T>({rowHeight, parseLine, height, 
         overscanStartIndex:0,
         visibleStopIndex:0,
         visibleStartIndex:0,
+
     })
-    // const [searchState, useSearchState] = useState<SearchState>({
-    //     resultLines: [],
-    //     //isSearching: false,
-    // })
-    // const searchBarRef = useRef(null)
 
     useImperativeHandle(ref, () => {
         return {
           newLine(lineText:T[]) {
-            setLogState(({lines, ...other}) => {
-
+            setLogState(({lines, ...others}) => {
                 return {
                     lines:lines.concat(...lineText),
-                    ...other
+                    ...others,
                 }
             })
           },
           clear() {
               setLogState(() => defaultLogState())
           },
-          search(): number[] {
-              return []
+          search(text: string|undefined): Promise<number[]> {
+              return new Promise(resolve => {
+                  setLogState((prev) => {
+                      const searchIndex:number[] = []
+                      const result = prev.lines.map((data, index) => {
+                          const r = onSearch(data, text)
+                          if (r.isSearch) {
+                              searchIndex.push(index)
+                          }
+                          return r.data
+                      })
+                      setTimeout(() => resolve(searchIndex))
+                      return {
+                          lines: result,
+                          focusLine: searchIndex.length>0 ? searchIndex[0]: -1,
+                      }
+                  })
+              })
           },
-          scroll(line: number) {
-              console.log('fuck here')
+
+          scroll(line: number, focus?:boolean) {
               listRef.current?.scrollToItem(line)
+              if(focus) {
+                  setLogState((prev) => ({...prev, focusLine: line}))
+              }
           }
         }
     },[])
@@ -78,9 +94,8 @@ export default forwardRef(function VirtualLog<T>({rowHeight, parseLine, height, 
         }
     }, [logState.lines.length]);
 
-    const renderRow = ({index, style}:ListChildComponentProps<T>) => {
-        const number = index + 1
-        return <Line style={style} key={number} index={number} data={parseLine(logState.lines[index]!!)} />
+    const innerRenderRow = (props:ListChildComponentProps<T>) => {
+        return renderRow(props, logState.lines[props.index], props.index === logState.focusLine)
     }
 
     const onItemsRendered = (data:ListOnItemsRenderedProps) => {
@@ -94,14 +109,8 @@ export default forwardRef(function VirtualLog<T>({rowHeight, parseLine, height, 
         height={height} width={width}
         onItemsRendered={onItemsRendered}
     >
-        {renderRow}
+        {innerRenderRow}
     </VariableSizeList>
-
-    // return <AutoSizer>
-    //     {({ height, width }) => {
-    //
-    //     }}
-    // </AutoSizer>
 })
 
 export function logItemParser(data:LogItem) {
