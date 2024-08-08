@@ -15,4 +15,4 @@
 #### - [ ] 3. SearchBar 尽量少维护数据
 只维护一个搜索总数和当前查询index即可。
 
-**突然想到：直接使用 mono editor 是否就解决问题了？**
+**突然想到：直接复用 Chrome 的 Dev console 是否就结束了？**
