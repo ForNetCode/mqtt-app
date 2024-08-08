@@ -1,14 +1,15 @@
 import { createFileRoute } from '@tanstack/react-router'
 // import {Button} from "@/components/ui/button.tsx";
 // import {initClient} from "@/mqtt.ts";
-// import log  from "loglevel";
-// import VirtualLog, {logItemParser, SimpleLogHandlerRef} from "@/components/virtualLog";
-// import {useEffect, useRef} from "react";
-// import {LogItem} from "@/constants.ts";
-import LogMockTest from "@/test/LogMockTest.tsx";
+// import log from "loglevel";
+import AutoSizer from "react-virtualized-auto-sizer";
+
+import VirtualLog, {logItemParser, VirtualLogHandlerRef} from "@/components/virtualLog";
+import {useEffect, useRef} from "react";
+import {LogItem} from "@/constants.ts";
 
 export const Route = createFileRoute('/test')({
-  component: () => <LogMockTest/>
+  component: () => <TestCF/>
 })
 /*
 function TestCF2() {
@@ -40,12 +41,12 @@ function TestCF2() {
     );
 }
 */
-/*
+
 function TestCF() {
-    const logRef = useRef<SimpleLogHandlerRef<LogItem>>(null)
+    const logRef = useRef<VirtualLogHandlerRef<LogItem>>(null)
 
     useEffect(() => {
-        const data = Array(50).fill(0).map((_,index) => {
+        const data = Array(2).fill(0).map((_,index) => {
             return {
                 log: ['hello world ' + index],
                 num:0,
@@ -54,30 +55,30 @@ function TestCF() {
         })
         const ref = logRef.current
         ref?.newLine(data)
+        let index = 0
+        const z = setInterval(() => {
+            ref?.newLine([{
+                log: [`hello world ${index++}`],
+                num:0,
+                time:Date.now()
+            } as LogItem])
+        },1000)
         return () => {
             ref?.clear()
+            clearInterval(z)
         }
     }, []);
-    const testMQTTClick = async () => {
-        log.info('begin')
-        try {
-            await initClient({
-                server: 'ws://113.31.103.71:8080',
-                clientId: 'log_test_client',
-            })
-        }catch (e) {
-            log.info('xxx', e)
-            return
-        }
-        log.info('ok')
-    }
+
 
     return (
         <div>
-            <Button onClick={testMQTTClick}>Test MQTT Connect</Button>
             <div className='w-full h-[300px]'>
-            <VirtualLog ref={logRef} parseLine={logItemParser} rowHeight={40}/>
+                <AutoSizer>
+                    { ({height, width}) =>
+                        <VirtualLog width={width} height={height} ref={logRef} parseLine={logItemParser} rowHeight={40}/>
+                    }
+                </AutoSizer>
             </div>
         </div>
     )
-}*/
+}

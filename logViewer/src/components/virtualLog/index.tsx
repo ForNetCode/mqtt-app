@@ -1,14 +1,14 @@
-import {forwardRef, ReactElement, Ref, useImperativeHandle, useState} from "react";
-import { ListChildComponentProps, VariableSizeList } from "react-window";
-import AutoSizer from "react-virtualized-auto-sizer";
+import {forwardRef, ReactElement, Ref, useEffect, useImperativeHandle, useRef, useState} from "react";
+import {ListChildComponentProps, ListOnItemsRenderedProps, VariableSizeList} from "react-window";
 import Line from "./line";
-import {List} from 'immutable'; // TODO: remove immutable
 import {LogItem} from "@/constants.ts";
 
 
 interface PureLogProps<T> {
     parseLine(lineText:T): ReactElement
     rowHeight: number
+    height: number|string
+    width: number|string
 }
 
 export interface VirtualLogHandlerRef<T> {
@@ -21,20 +21,27 @@ export interface VirtualLogHandlerRef<T> {
 
 interface LogState<T> {
     scrollToIndex: number
-    lines: List<T>
+    lines: T[]
 }
 
 function defaultLogState<T>():LogState<T> {
     return {
         scrollToIndex:0,
-        lines: List<T>()
+        lines: []
     }
 }
 
 // ref: https://github.com/NadiaIdris/ts-log-viewer to more text
 
-export default forwardRef(function VirtualLog<T>({rowHeight, parseLine}:PureLogProps<T>, ref: Ref<VirtualLogHandlerRef<T>>) {
+export default forwardRef(function VirtualLog<T>({rowHeight, parseLine, height, width}:PureLogProps<T>, ref: Ref<VirtualLogHandlerRef<T>>) {
     const [logState, setLogState] = useState<LogState<T>>(defaultLogState)
+    const listRef = useRef<VariableSizeList>(null)
+    const refState = useRef<ListOnItemsRenderedProps>({
+        overscanStopIndex:0,
+        overscanStartIndex:0,
+        visibleStopIndex:0,
+        visibleStartIndex:0,
+    })
     // const [searchState, useSearchState] = useState<SearchState>({
     //     resultLines: [],
     //     //isSearching: false,
@@ -45,8 +52,9 @@ export default forwardRef(function VirtualLog<T>({rowHeight, parseLine}:PureLogP
         return {
           newLine(lineText:T[]) {
             setLogState(({lines, ...other}) => {
+
                 return {
-                    lines: lines.concat(lineText),
+                    lines:lines.concat(...lineText),
                     ...other
                 }
             })
@@ -57,28 +65,42 @@ export default forwardRef(function VirtualLog<T>({rowHeight, parseLine}:PureLogP
           search(): number[] {
               return []
           },
-          scroll(){
-
+          scroll(line: number) {
+              listRef.current?.scrollToItem(line)
           }
         }
     },[])
+    useEffect(() => {
+        const index= refState.current.overscanStopIndex
+        if(index> 0 && logState.lines.length - index == 1) {
+            listRef.current?.scrollToItem(logState.lines.length)
+        }
+    }, [logState.lines.length]);
 
     const renderRow = ({index, style}:ListChildComponentProps<T>) => {
-        const number = index +1
-        return <Line style={style} key={number} index={number} data={parseLine(logState.lines.get(index)!!)} />
+        const number = index + 1
+        return <Line style={style} key={number} index={number} data={parseLine(logState.lines[index]!!)} />
     }
 
-    return <AutoSizer>
-        {({ height, width }) => {
-            return <VariableSizeList
-                className='py-2'
-                itemSize={() => rowHeight}
-                itemCount={logState.lines.size}
-                height={height} width={width}>
-                {renderRow}
-            </VariableSizeList>
-        }}
-    </AutoSizer>
+    const onItemsRendered = (data:ListOnItemsRenderedProps) => {
+        refState.current = data
+    }
+    return <VariableSizeList
+        ref={listRef}
+        className='py-2'
+        itemSize={() => rowHeight}
+        itemCount={logState.lines.length}
+        height={height} width={width}
+        onItemsRendered={onItemsRendered}
+    >
+        {renderRow}
+    </VariableSizeList>
+
+    // return <AutoSizer>
+    //     {({ height, width }) => {
+    //
+    //     }}
+    // </AutoSizer>
 })
 
 export function logItemParser(data:LogItem) {
