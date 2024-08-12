@@ -2,19 +2,17 @@ import {getClientStatus, LogItem, MQTTTopicStatus} from "@/constants.ts";
 import {getMQTTClient, mqttEmitter} from "@/mqtt.ts";
 import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip.tsx";
 import {useEffect, useState} from "react";
-import {DownloadIcon, GearIcon, Link2Icon, LinkBreak2Icon, TrashIcon} from "@radix-ui/react-icons";
+import {GearIcon, Link2Icon, LinkBreak2Icon} from "@radix-ui/react-icons";
 import {cn} from "@/lib/utils.ts";
 import {Dialog} from "@/components/ui/dialog.tsx";
 import EditTopicDialog from "@/routes/_auth/-components/editTopicDialog.tsx";
 import {topicStore, updateTopic} from "@/store/topicStore.ts";
-import {pureStringParser} from "@/components/virtualLog";
-import {toast} from "sonner";
 
 
 export interface LogViewProps {
     topic:string,
 }
-
+/*
 function downloadFile(filename:string, text: string) {
     const element = document.createElement('a');
     element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
@@ -25,7 +23,7 @@ function downloadFile(filename:string, text: string) {
 
     document.body.removeChild(element);
 }
-
+*/
 
 export default function LogView({topic}:LogViewProps) {
     const {subscribed, online, confTopic, logLevel,qos} = topicStore(({topics}) => {
@@ -36,25 +34,15 @@ export default function LogView({topic}:LogViewProps) {
 
     useEffect(() => {
         const func = (e:LogItem) => {
-            topicStore.setState(v => {v.topics[topic].logs.push(e)})
+            // topicStore.setState(v => {v.topics[topic].logs.push(e)})
+            // @ts-ignore
+            console[e.name](...e.log)
         }
         mqttEmitter.on(topic, func)
         return () => {
             mqttEmitter.off(topic, func)
         }
     }, [])
-    const download = () => {
-        const logs = topicStore.getState().topics[topic].logs
-        if(logs.length) {
-            const logText = logs.map(v => {
-                return pureStringParser(v.log)
-            })
-            downloadFile('log.log', logText.join('\n'))
-        }else {
-            toast('There is no log')
-        }
-    }
-    const clear = () => topicStore.setState(v => {v.topics[topic].logs = []})
 
     const subscribeOrUnSubscribeTopic = async () => {
         const client = getMQTTClient()
@@ -75,16 +63,6 @@ export default function LogView({topic}:LogViewProps) {
                 <TopicStatusDesc status={getClientStatus(subscribed, online)} onClick={() => console.log('xxx')}/>
                 <div className="flex flex-row space-x-8 mr-2.5">
                     <TooltipProvider>
-                        <Tooltip>
-                            <TooltipTrigger onClick={download}>
-                                <DownloadIcon/>
-                            </TooltipTrigger>
-                            <TooltipContent>Download Log</TooltipContent>
-                        </Tooltip>
-                        <Tooltip>
-                            <TooltipTrigger onClick={clear}><TrashIcon/></TooltipTrigger>
-                            <TooltipContent>Clean Log</TooltipContent>
-                        </Tooltip>
                         <Tooltip>
                             <TooltipTrigger onClick={subscribeOrUnSubscribeTopic}>{subscribed? <Link2Icon/>:<LinkBreak2Icon />}</TooltipTrigger>
                             <TooltipContent>Subscribe Log</TooltipContent>

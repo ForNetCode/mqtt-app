@@ -18,7 +18,6 @@ import {
     AlertDialogTrigger
 } from "@/components/ui/alert-dialog.tsx";
 import {useAuth} from "@/auth.tsx";
-import SimpleLog from "@/components/simpleLog";
 
 export const Route = createFileRoute('/_auth/')({
     beforeLoad: ({context, location}) => {
@@ -72,13 +71,12 @@ function Dashboard() {
     }
     const Content = () => {
         const data = Object.keys(topics).map((topic) => {
-            const item = topics[topic]
-            const {logs} = item
+            // const item = topics[topic]
+            // const {logs} = item
             //return <LogView key={topic} topic={topic}/>
             return(<TabsContent value={topic} key={topic} asChild>
                 <>
                 <LogView topic={topic}/>
-                <SimpleLog logs={logs} />
                 </>
             </TabsContent>)
         })

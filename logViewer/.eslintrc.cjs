@@ -16,5 +16,6 @@ module.exports = {
     ],
     "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/no-extra-non-null-assertion": "off",
+    "@typescript-eslint/ban-ts-comment": "off",
   },
 }
